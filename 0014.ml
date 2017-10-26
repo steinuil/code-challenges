@@ -5,9 +5,6 @@ let seen : (int, int) Hashtbl.t =
 
 let () = Hashtbl.add seen 1 1
 
-(* let seen : int option array = Array.make one_million None
-let () = Array.set seen 1 (Some 1) *)
-
 let rec collatz n acc =
   match Hashtbl.find_opt seen n with
   | None ->
@@ -23,13 +20,13 @@ let rec collatz n acc =
         count
       end x acc
 
-
 let () =
+  let max = ref (0, 0) in
   for i = 13 to one_million do
-    ignore @@ collatz i []
+    let len = collatz i [] in
+    let (_, max_len) = !max in
+    if len > max_len then
+      max := (i, len)
   done;
-  let (max, _) = Hashtbl.fold begin fun n count ((_, max) as acc) ->
-      if count > max then (n, count) else acc
-    end seen (0, 0) in
-  print_int max;
+  print_int (fst !max);
   print_newline ()
