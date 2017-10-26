@@ -8,17 +8,17 @@ let () = Hashtbl.add seen 1 1
 let rec collatz n acc =
   match Hashtbl.find_opt seen n with
   | None ->
-      let x =
+      let next =
         if n mod 2 == 0
         then n / 2
         else (3 * n) + 1 in
-      collatz x (n :: acc)
-  | Some x ->
+      collatz next (n :: acc)
+  | Some steps ->
       List.fold_left begin fun x n ->
-        let count = x + 1 in
-        Hashtbl.add seen n count;
-        count
-      end x acc
+        let steps = x + 1 in
+        Hashtbl.add seen n steps;
+        steps
+      end steps acc
 
 let () =
   let max = ref (0, 0) in
