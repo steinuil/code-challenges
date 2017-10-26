@@ -1,9 +1,7 @@
-nth = 10_001
+NTH = 10_001
+BLOCK_SIZE = 2 << 16
 
 primes = []
-
-BLOCK_SIZE = 10_000
-
 stops = {}
 
 0.upto(Float::INFINITY).each do |block|
@@ -22,7 +20,7 @@ stops = {}
   end
 
   BLOCK_SIZE.times do |i|
-    next if i + offset < 2
+    next if offset == 0 and i < 2
     next if i != 2 and i % 2 == 0
     next unless nums[i]
 
@@ -39,7 +37,7 @@ stops = {}
     stops[prime] = n + offset
   end
 
-  if prime = primes[nth - 1]
+  if prime = primes[NTH - 1]
     puts prime
     exit
   end
