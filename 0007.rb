@@ -1,4 +1,5 @@
 NTH = 10_001
+# works best with 2 << 12 to 2 << 16
 BLOCK_SIZE = 2 << 16
 
 primes = []
