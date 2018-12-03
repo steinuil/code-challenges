@@ -1,0 +1,24 @@
+{
+  "name": "daze",
+  "version": "0.1.0",
+  "description": "kagerou daze",
+  "main": "index.ts",
+  "author": "Francesco Maletto <f.maletto@cgmconsulting.it>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chai": "^4.1.7",
+    "@types/mocha": "^5.2.5",
+    "browserify": "^16.2.3",
+    "chai": "^4.2.0",
+    "fast-check": "^1.8.1",
+    "mocha": "^5.2.0",
+    "ts-node": "^7.0.1",
+    "typescript": "^3.2.1"
+  },
+  "dependencies": {
+    "rxjs": "^6.3.3"
+  },
+  "scripts": {
+    "test": "mocha --require ts-node/register **/*.test.ts"
+  }
+}
