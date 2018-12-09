@@ -2,30 +2,41 @@
 
 ; 465 players; last marble is worth 71940 points
 
+(struct dcons (data prev next) #:mutable #:transparent)
+
+(define dcdr dcons-next)
+
+(define (insert-after d1 data)
+  (define d (dcons data d1 (dcons-next d1)))
+  (set-dcons-prev! (dcons-next d1) d)
+  (set-dcons-next! d1 d)
+  d)
+
+(define (delete-after d)
+  (define data (dcons-data (dcons-next d)))
+  (set-dcons-prev! (dcons-next (dcons-next d)) d)
+  (set-dcons-next! d (dcons-next (dcons-next d)))
+  data)
+
+(define (make-circular-dlist data)
+  (define d (dcons data null null))
+  (set-dcons-next! d d)
+  (set-dcons-prev! d d)
+  d)
+
 ;; Returns (values <new-curr-cons> <maybe-taken-marble>)
 (define (place-marble marble curr-cons)
   (if (= (modulo marble 23) 0)
-      (let loop ([curr-cons curr-cons])
-        (if (eq? (mcar (mcdr (mcdr (mcdr (mcdr (mcdr (mcdr (mcdr (mcdr curr-cons)))))))))
-                 (- marble 1))
-            (let ([next (mcdr (mcdr curr-cons))]
-                  [taken (mcar (mcdr curr-cons))])
-              (set-mcdr! curr-cons next)
-              (values next taken))
-            (loop (mcdr curr-cons))))
-      (let ([new-curr (mcons marble (mcdr (mcdr curr-cons)))])
-        (set-mcdr! (mcdr curr-cons) new-curr)
-        (values (mcdr (mcdr curr-cons)) null))))
-
-(define (make-circular-list)
-  (define circle (mcons 1 (mcons 0 '())))
-  (set-mcdr! (mcdr circle) circle)
-  circle)
+      (let ([before (dcons-prev (dcons-prev (dcons-prev (dcons-prev (dcons-prev (dcons-prev (dcons-prev
+                                                                                             (dcons-prev curr-cons))))))))])
+        (define taken (delete-after before))
+        (values (dcons-next before) taken))
+      (values (insert-after (dcons-next curr-cons) marble) null)))
 
 (define (place-until last-marble n-players)
   (let loop ([m 2]
              [player 2]
-             [curr-cons (make-circular-list)]
+             [curr-cons (insert-after (make-circular-dlist 0) 1)]
              [scores #hash()])
     (if (> m last-marble)
         scores
@@ -41,4 +52,4 @@
 
 (displayln (apply max (hash-values (place-until 71940 465))))
 
-;(displayln (apply max (hash-values (place-until (* 100 71940) 465))))
+(displayln (apply max (hash-values (place-until (* 100 71940) 465))))
