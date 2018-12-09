@@ -24,11 +24,15 @@
   (set-dcons-prev! d d)
   d)
 
+(define (dprevn d n)
+  (if (= n 0)
+    d
+    (dprevn (dcons-prev d) (- n 1))))
+
 ;; Returns (values <new-curr-cons> <maybe-taken-marble>)
 (define (place-marble marble curr-cons)
   (if (= (modulo marble 23) 0)
-      (let ([before (dcons-prev (dcons-prev (dcons-prev (dcons-prev (dcons-prev (dcons-prev (dcons-prev
-                                                                                             (dcons-prev curr-cons))))))))])
+      (let ([before (dprevn curr-cons 8)])
         (define taken (delete-after before))
         (values (dcons-next before) taken))
       (values (insert-after (dcons-next curr-cons) marble) null)))
