@@ -7,7 +7,7 @@ let compile = function
     `Halt, rest
   | _ ->
     failwith "invalid program"
-    
+
 let replace ~at ~v ls =
   let rec loop count acc = function
     | _ :: tl when count < 1 ->
@@ -18,7 +18,7 @@ let replace ~at ~v ls =
       invalid_arg "list overflow"
   in
   loop at [] ls
-  
+
 let rec eva program rest =
   match compile rest with
   | `Add (p1, p2, out), rest ->
@@ -33,12 +33,12 @@ let rec eva program rest =
     eva program rest
   | `Halt, _ ->
     program
-    
+
 let rec print_program = function
   | [] -> ()
   | n :: [] -> print_int n
   | n :: rest -> print_int n; print_char ','; print_program rest
-  
+
 let execute program ~noun ~verb =
   let program =
     program
