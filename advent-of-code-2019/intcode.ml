@@ -101,32 +101,61 @@ let eval_param ~program = function
   | Position n -> List.nth program n
 
 
-let evaluate program =
-  let rec evaluate program pc =
+let eval_instr ~program ~input = function
+  | Add (p1, p2, out) ->
+    let v1 = eval_param ~program p1 in
+    let v2 = eval_param ~program p2 in
+    Some (
+      replace program ~at:out ~v:(v1 + v2),
+      input,
+      None
+    )
+
+  | Multiply (p1, p2, out) ->
+    let v1 = eval_param ~program p1 in
+    let v2 = eval_param ~program p2 in
+    Some (
+      replace program ~at:out ~v:(v1 * v2),
+      input,
+      None
+    )
+
+  | Input out ->
+    let v, rest = match input with
+      | [] -> failwith "required input"
+      | v :: rest -> v, rest
+    in
+    Some (
+      replace program ~at:out ~v,
+      input,
+      None
+    )
+
+  | Output v ->
+    let v = eval_param ~program v in
+    Some (
+      program,
+      input,
+      Some v
+    )
+
+  | Halt ->
+    None
+
+
+let evaluate ?(input=[]) program =
+  let rec evaluate program input pc =
     let rest = list_drop pc program in
-    match compile rest with
-    | Add (p1, p2, out), read ->
-      let v1 = eval_param ~program p1 in
-      let v2 = eval_param ~program p2 in
-      let program = program |> replace ~at:out ~v:(v1 + v2) in
-      evaluate program (pc + read)
-
-    | Multiply (p1, p2, out), read ->
-      let v1 = eval_param ~program p1 in
-      let v2 = eval_param ~program p2 in
-      let program = program |> replace ~at:out ~v:(v1 * v2) in
-      evaluate program (pc + read)
-
-    | Input p, read ->
-      evaluate program (pc + read)
-
-    | Output p, read ->
-      evaluate program (pc + read)
-
-    | Halt, _ ->
+    let instr, read = compile rest in
+    match eval_instr instr ~program ~input with
+    | None ->
       program
+
+    | Some (program, input, output) ->
+      Option.iter (fun o -> print_int o; print_newline ()) output;
+      evaluate program input (pc + read)
   in
-  evaluate program 0
+  evaluate program input 0
 
 
 let show program =
@@ -142,3 +171,15 @@ let show program =
   in
   print_char '[';
   show program
+
+
+let read_from_file fname =
+  let f = open_in fname in
+  let program =
+    f
+    |> input_line
+    |> String.split_on_char ','
+    |> List.map int_of_string
+  in
+  close_in f;
+  program
