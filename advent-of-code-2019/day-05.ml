@@ -2,6 +2,6 @@
 
 
 let () =
-  Intcode.read_from_file "day-05.input"
-  |> Intcode.evaluate ~input:[1]
-  |> ignore
+  let program = Intcode.read_from_file "day-05.input" in
+  program |> Intcode.evaluate ~input:[1] |> ignore;
+  program |> Intcode.evaluate ~input:[5] |> ignore

@@ -19,6 +19,10 @@ type instruction =
   | Multiply of param * param * int
   | Input of int
   | Output of param
+  | Jump_if_true of param * param
+  | Jump_if_false of param * param
+  | Less_than of param * param * int
+  | Equals of param * param * int
   | Halt
 
 
@@ -77,6 +81,22 @@ let compile = function
     let p = param p m in
     Output p, 2
 
+  | (5, m), cond :: v :: _ ->
+    let cond, v = param2 cond v m in
+    Jump_if_true (cond, v), 3
+
+  | (6, m), cond :: v :: _ ->
+    let cond, v = param2 cond v m in
+    Jump_if_false (cond, v), 3
+
+  | (7, m), o1 :: o2 :: out :: _ ->
+    let o1, o2 = param2 o1 o2 m in
+    Less_than (o1, o2, out), 4
+
+  | (8, m), o1 :: o2 :: out :: _ ->
+    let o1, o2 = param2 o1 o2 m in
+    Equals (o1, o2, out), 4
+
   | (99, _), _ ->
     Halt, 1
 
@@ -101,59 +121,67 @@ let eval_param ~program = function
   | Position n -> List.nth program n
 
 
-let eval_instr ~program ~input = function
-  | Add (p1, p2, out) ->
-    let v1 = eval_param ~program p1 in
-    let v2 = eval_param ~program p2 in
-    Some (
-      replace program ~at:out ~v:(v1 + v2),
-      input,
-      None
-    )
-
-  | Multiply (p1, p2, out) ->
-    let v1 = eval_param ~program p1 in
-    let v2 = eval_param ~program p2 in
-    Some (
-      replace program ~at:out ~v:(v1 * v2),
-      input,
-      None
-    )
-
-  | Input out ->
-    let v, rest = match input with
-      | [] -> failwith "required input"
-      | v :: rest -> v, rest
-    in
-    Some (
-      replace program ~at:out ~v,
-      input,
-      None
-    )
-
-  | Output v ->
-    let v = eval_param ~program v in
-    Some (
-      program,
-      input,
-      Some v
-    )
-
-  | Halt ->
-    None
-
-
 let evaluate ?(input=[]) program =
   let rec evaluate program input pc =
     let rest = list_drop pc program in
     let instr, read = compile rest in
-    match eval_instr instr ~program ~input with
-    | None ->
-      program
-
-    | Some (program, input, output) ->
-      Option.iter (fun o -> print_int o; print_newline ()) output;
+    match instr with
+    | Add (o1, o2, out) ->
+      let v1 = eval_param ~program o1 in
+      let v2 = eval_param ~program o2 in
+      let program = replace program ~at:out ~v:(v1 + v2) in
       evaluate program input (pc + read)
+
+    | Multiply (o1, o2, out) ->
+      let v1 = eval_param ~program o1 in
+      let v2 = eval_param ~program o2 in
+      let program = replace program ~at:out ~v:(v1 * v2) in
+      evaluate program input (pc + read)
+
+    | Input out ->
+      let v, input = match input with
+        | [] -> failwith "required input"
+        | v :: rest -> v, rest
+      in
+      let program = replace program ~at:out ~v in
+      evaluate program input (pc + read)
+
+    | Output v ->
+      let v = eval_param ~program v in
+      print_int v;
+      print_newline ();
+      evaluate program input (pc + read)
+
+    | Jump_if_true (cond, v) ->
+      let cond = eval_param ~program cond in
+      if cond <> 0 then
+        let pc = eval_param ~program v in
+        evaluate program input pc
+      else
+        evaluate program input (pc + read)
+
+    | Jump_if_false (cond, v) ->
+      let cond = eval_param ~program cond in
+      if cond = 0 then
+        let pc = eval_param ~program v in
+        evaluate program input pc
+      else
+        evaluate program input (pc + read)
+
+    | Less_than (o1, o2, out) ->
+      let o1 = eval_param ~program o1 in
+      let o2 = eval_param ~program o2 in
+      let program = replace program ~at:out ~v:(if o1 < o2 then 1 else 0) in
+      evaluate program input (pc + read)
+
+    | Equals (o1, o2, out) ->
+      let o1 = eval_param ~program o1 in
+      let o2 = eval_param ~program o2 in
+      let program = replace program ~at:out ~v:(if o1 = o2 then 1 else 0) in
+      evaluate program input (pc + read)
+
+    | Halt ->
+      program
   in
   evaluate program input 0
 
@@ -173,13 +201,18 @@ let show program =
   show program
 
 
+let read_from_string str =
+  str
+  |> String.split_on_char ','
+  |> List.map int_of_string
+
+
 let read_from_file fname =
   let f = open_in fname in
   let program =
     f
     |> input_line
-    |> String.split_on_char ','
-    |> List.map int_of_string
+    |> read_from_string
   in
   close_in f;
   program

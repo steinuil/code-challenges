@@ -1,4 +1,4 @@
-#mod_use "./intcode.ml"
+#mod_use "intcode.ml"
 
 let execute program ~noun ~verb =
   let program =
@@ -22,13 +22,10 @@ let find_output output program =
   loop 0 0
 
 let () =
-  let f = open_in "day-02.input" in
-  let program =
-    f
-    |> input_line
-    |> String.split_on_char ','
-    |> List.map int_of_string
-  in
-  close_in f;
-  execute program ~noun:12 ~verb:2 |> print_int; print_newline ();
-  find_output 19690720 program |> print_int; print_newline ()
+  let program = Intcode.read_from_file "day-02.input" in
+
+  execute program ~noun:12 ~verb:2
+  |> print_int; print_newline ();
+
+  find_output 19690720 program
+  |> print_int; print_newline ()
