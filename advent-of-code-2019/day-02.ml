@@ -1,8 +1,16 @@
 #mod_use "./intcode.ml"
 
+let execute program ~noun ~verb =
+  let program =
+    program
+    |> Intcode.replace ~at:1 ~v:noun
+    |> Intcode.replace ~at:2 ~v:verb
+  in
+  Intcode.evaluate program |> List.hd
+
 let find_output output program =
   let rec loop noun verb =
-    if Intcode.execute program ~noun ~verb = output then
+    if execute program ~noun ~verb = output then
       100 * noun + verb
     else if verb < 99 then
       loop noun (verb + 1)
@@ -22,5 +30,5 @@ let () =
     |> List.map int_of_string
   in
   close_in f;
-  Intcode.execute program ~noun:12 ~verb:2 |> print_int; print_newline ();
+  execute program ~noun:12 ~verb:2 |> print_int; print_newline ();
   find_output 19690720 program |> print_int; print_newline ()
