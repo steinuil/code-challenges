@@ -14,5 +14,5 @@ let rec digitsOf (n : bigint) =
 do
   factorial 100
   |> digitsOf
-  |> Seq.fold ( + ) 0
+  |> Seq.sum
   |> printfn "%A"
