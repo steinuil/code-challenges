@@ -23,7 +23,7 @@ let find2D needle (arr: 'a [,]) =
     go 0 0
 
 
-type Day13Game() as this =
+type Day13Game(inputFile) as this =
     inherit Game()
 
     let graphics =
@@ -80,7 +80,7 @@ type Day13Game() as this =
         font <- this.Content.Load<SpriteFont>(@"Content\coders_crux")
 
         programState <-
-            Intcode.fromFile "day-13.input"
+            Intcode.fromFile inputFile
             |> Intcode.replace 0 2L
             |> Intcode.ProgramState.make [ 2L ]
 
@@ -192,7 +192,12 @@ type Day13Game() as this =
 
 
 [<EntryPoint; STAThread>]
-let main _argv =
-    use game = new Day13Game()
-    game.Run()
-    0
+let main =
+    function
+    | [| inputFile |] ->
+        use game = new Day13Game(inputFile)
+        game.Run()
+        0
+    | _ ->
+        eprintfn "Usage: day-13.exe <input file>"
+        1
