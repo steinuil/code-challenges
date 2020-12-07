@@ -8,10 +8,9 @@ let parse =
         let contained =
             contained
             |> Monke.String.split [ ", " ]
-            |> Seq.map (fun bag ->
-                match bag with
+            |> Seq.map (function
                 | Monke.RegexMatch @"^(\d+) (.+) bags?$" [ count; color ] -> int count, color
-                | _ -> failwith bag)
+                | bag -> failwith bag)
 
         bagColor, contained
 
@@ -32,7 +31,7 @@ dark olive bags contain 3 faded blue bags, 4 dotted black bags.
 vibrant plum bags contain 5 faded blue bags, 6 dotted black bags.
 faded blue bags contain no other bags.
 dotted black bags contain no other bags."
-    |> Monke.String.split [ "\r\n"; "\n" ]
+    |> Monke.String.splitLines
     |> Seq.map parse
 
 
@@ -66,19 +65,10 @@ input
 
 
 let count2 needle (input: seq<string * seq<int * string>>) =
-    let cache = Monke.Dict.empty ()
-
-    let rec check bag =
-        match Monke.Dict.tryFind bag cache with
-        | Some n -> n
-        | None ->
+    let check =
+        Monke.memoRec (fun check bag ->
             let _, contained = Seq.find (fun (b, _) -> b = bag) input
-
-            let count =
-                Seq.sumBy (fun (n, b) -> n + n * check b) contained
-
-            Monke.Dict.add bag count cache
-            count
+            Seq.sumBy (fun (n, b) -> n + n * check b) contained)
 
     check needle
 
@@ -90,7 +80,7 @@ dark yellow bags contain 2 dark green bags.
 dark green bags contain 2 dark blue bags.
 dark blue bags contain 2 dark violet bags.
 dark violet bags contain no other bags."
-|> Monke.String.split [ "\r\n"; "\n" ]
+|> Monke.String.splitLines
 |> Seq.map parse
 |> count2 "shiny gold"
 |> printfn "Example 2: %d"

@@ -24,6 +24,8 @@ module String =
     let split (seps: string seq) (string: string) =
         string.Split(Seq.toArray seps, StringSplitOptions.None)
 
+    let splitLines = split [ "\r\n"; "\n" ]
+
     let splitRemoveEmpty (seps: string seq) (string: string) =
         string.Split(Seq.toArray seps, StringSplitOptions.RemoveEmptyEntries)
 
@@ -74,3 +76,32 @@ module Dict =
         | false, _ -> None
 
     let add key value (dict: Dictionary<_, _>) = dict.Add(key, value)
+
+
+let memo f =
+    let cache = Dict.empty ()
+
+    fun inp ->
+        match Dict.tryFind inp cache with
+        | Some v -> v
+        | None ->
+            let v = f inp
+            Dict.add inp v cache
+            v
+
+
+let memoRec f =
+    let cache = Dict.empty ()
+
+    let rec memoized inp =
+        match Dict.tryFind inp cache with
+        | Some v -> v
+        | None ->
+            let v = f memoized inp
+            Dict.add inp v cache
+            v
+
+    memoized
+
+
+let flip f a b = f b a
