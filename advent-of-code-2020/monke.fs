@@ -2,7 +2,9 @@ module Monke
 
 
 open System
+open System.Collections.Generic
 open System.IO
+open System.Text.RegularExpressions
 
 
 module IO =
@@ -54,3 +56,21 @@ let tryParseHexByte (s: string): option<uint8> =
 module Option =
     let check f =
         Option.bind (fun t -> if f t then Some t else None)
+
+
+let (|RegexMatch|_|) pattern input =
+    let m = Regex.Match(input, pattern)
+    if m.Success
+    then Some(List.tail [ for g in m.Groups -> g.Value ])
+    else None
+
+
+module Dict =
+    let empty (): Dictionary<'k, 'v> = new Dictionary<'k, 'v>()
+
+    let tryFind key (dict: Dictionary<_, _>) =
+        match dict.TryGetValue key with
+        | true, v -> Some v
+        | false, _ -> None
+
+    let add key value (dict: Dictionary<_, _>) = dict.Add(key, value)
