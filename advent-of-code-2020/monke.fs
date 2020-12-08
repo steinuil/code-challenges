@@ -105,3 +105,14 @@ let memoRec f =
 
 
 let flip f a b = f b a
+
+
+module List =
+    let replace at v ls =
+        let rec loop count acc =
+            function
+            | _ :: tl when count < 1 -> List.append (List.rev acc) (v :: tl)
+            | hd :: tl -> loop (count - 1) (hd :: acc) tl
+            | [] -> failwith "invalid length"
+
+        loop at [] ls
