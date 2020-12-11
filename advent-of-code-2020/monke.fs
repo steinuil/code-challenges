@@ -33,6 +33,10 @@ module String =
         let i = string.IndexOf(sep)
         string.[0..i - 1], string.[i + 1..]
 
+    let chars (string: String) = string.ToCharArray()
+
+    let fromChars: seq<char> -> String = String.Concat
+
 
 type OptionMonad() =
     member _.Bind(t, f) = Option.bind f t
@@ -116,3 +120,12 @@ module List =
             | [] -> failwith "invalid length"
 
         loop at [] ls
+
+
+module Array2D =
+    let toSeq (arr: 'a [,]) =
+        seq {
+            for y in 0 .. Array2D.length1 arr - 1 do
+                for x in 0 .. Array2D.length2 arr - 1 do
+                    yield arr.[y, x]
+        }
