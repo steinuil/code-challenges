@@ -42,16 +42,22 @@ let step (board: char [,]) =
     let shouldBecomeEmpty s =
         s |> Seq.filter ((=) '#') |> Seq.length >= 4
 
+    let newBoard = Array2D.copy board
+    let mutable hasChanged = false
+
     board
-    |> Array2D.mapi (fun y x ->
+    |> Array2D.iteri (fun y x ->
         let adj = adjacent y x
         function
-        | 'L' when shouldBecomeOccupied adj -> '#'
-        | '#' when shouldBecomeEmpty adj -> 'L'
-        | '.'
-        | 'L'
-        | '#' as c -> c
-        | c -> failwithf "invalid tile: %c" c)
+        | 'L' when shouldBecomeOccupied adj ->
+            newBoard.[y, x] <- '#'
+            hasChanged <- true
+        | '#' when shouldBecomeEmpty adj ->
+            newBoard.[y, x] <- 'L'
+            hasChanged <- true
+        | _ -> ())
+
+    newBoard, hasChanged
 
 
 let showArray2D (arr: char [,]) =
@@ -66,8 +72,8 @@ let showArray2D (arr: char [,]) =
 
 let untilFixpoint =
     let rec loop board =
-        let newBoard = step board
-        if newBoard = board then board else loop newBoard
+        let newBoard, hasChanged = step board
+        if hasChanged then loop newBoard else newBoard
 
     loop
 
