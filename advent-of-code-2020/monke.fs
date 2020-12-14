@@ -131,7 +131,11 @@ module Array2D =
         }
 
 
-// let toBinary n = Convert.ToString(n, 2)
+
+let byteToBaseString (bas: int) (n: byte) = Convert.ToString(n, bas)
+let int16ToBaseString (bas: int) (n: int16) = Convert.ToString(n, bas)
+let intToBaseString (bas: int) (n: int) = Convert.ToString(n, bas)
+let int64ToBaseString (bas: int) (n: int64) = Convert.ToString(n, bas)
 
 
 let invalidInput inp = failwithf "invalid input: %A" inp
