@@ -129,3 +129,9 @@ module Array2D =
                 for x in 0 .. Array2D.length2 arr - 1 do
                     yield arr.[y, x]
         }
+
+
+// let toBinary n = Convert.ToString(n, 2)
+
+
+let invalidInput inp = failwithf "invalid input: %A" inp
