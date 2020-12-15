@@ -79,7 +79,7 @@ module Dict =
         | true, v -> Some v
         | false, _ -> None
 
-    let add key value (dict: Dictionary<_, _>) = dict.Add(key, value)
+    let add key value (dict: Dictionary<_, _>) = dict.[key] <- value
 
 
 let memo f =
@@ -129,7 +129,6 @@ module Array2D =
                 for x in 0 .. Array2D.length2 arr - 1 do
                     yield arr.[y, x]
         }
-
 
 
 let byteToBaseString (bas: int) (n: byte) = Convert.ToString(n, bas)
