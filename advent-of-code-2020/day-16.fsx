@@ -137,7 +137,7 @@ let validFieldsPerColumn (fields, yourTicket, nearbyTickets) =
     |> List.rev
 
 
-let ayy (fields, yourTicket, nearbyTickets) =
+let solveWithMsPaint (fields, yourTicket, nearbyTickets) =
     let fs =
         validFieldsPerColumn (fields, yourTicket, nearbyTickets)
 
@@ -147,60 +147,84 @@ let ayy (fields, yourTicket, nearbyTickets) =
         |> Seq.map (fun (v, k) -> (k.Name, v))
         |> Map.ofSeq
 
-    fs
-    |> Seq.map (Seq.map (fun { Name = name } -> Map.find name toNum)),
-    toNum
+    let nums =
+        fs
+        |> Seq.map (Seq.map (fun { Name = name } -> Map.find name toNum))
 
 
-input
-|> parse
-|> filterValidTickets
-|> ayy
-// |> Seq.map
-//     (Seq.map (fun { Name = name } -> name)
-//      >> String.concat ", ")
-|> fun (nums, map) ->
     Seq.iter
         (printfn "%s"
          << String.concat ", "
          << Seq.map string)
         nums
-    map
+
+    toNum
     |> Map.toSeq
     |> Seq.iter (fun (name, num) -> printfn "%s = %d" name num)
 
+    (* Solved by hand, see day-16.png *)
 
-(* Solved by hand, see day-16.png *)
+    let inputOrder =
+        [ "row"
+          "seat"
+          "arrival location"
+          "duration"
+          "departure date"
+          "route"
+          "wagon"
+          "departure station"
+          "price"
+          "departure location"
+          "departure platform"
+          "departure track"
+          "zone"
+          "type"
+          "departure time"
+          "arrival track"
+          "arrival station"
+          "class"
+          "arrival platform"
+          "train" ]
 
-
-let inputOrder =
-    [ "row"
-      "seat"
-      "arrival location"
-      "duration"
-      "departure date"
-      "route"
-      "wagon"
-      "departure station"
-      "price"
-      "departure location"
-      "departure platform"
-      "departure track"
-      "zone"
-      "type"
-      "departure time"
-      "arrival track"
-      "arrival station"
-      "class"
-      "arrival platform"
-      "train" ]
-
-
-input
-|> parse
-|> fun (_, yourTicket, _) ->
     Seq.zip inputOrder yourTicket
     |> Seq.filter (fun (name, _) -> name.StartsWith("departure"))
     |> Seq.map (snd >> int64)
     |> Seq.reduce (*)
+    |> printfn "Part Two: %d"
+
+
+let solveProperly (fields, yourTicket, nearbyTickets) =
+    let fs =
+        validFieldsPerColumn (fields, yourTicket, nearbyTickets)
+        |> Seq.indexed
+
+    let rec loop solved rest =
+        if Seq.isEmpty rest then
+            solved |> List.sortBy fst |> List.map snd
+        else
+            let (i, onePossibilities), rest =
+                rest
+                |> listExtract (fun (_, possibilities) -> Seq.length possibilities = 1)
+
+            let field = onePossibilities |> Seq.item 0
+
+            let rest =
+                List.map (fun (i, possibilities) -> i, Seq.filter (fun name -> name <> field) possibilities) rest
+
+            loop ((i, field) :: solved) rest
+
+    let inputOrder =
+        loop [] (Seq.toList fs)
+        |> Seq.map (fun { Name = name } -> name)
+
+    Seq.zip inputOrder yourTicket
+    |> Seq.filter (fun (name, _) -> name.StartsWith("departure"))
+    |> Seq.map (snd >> int64)
+    |> Seq.reduce (*)
+
+
+input
+|> parse
+|> filterValidTickets
+|> solveProperly
 |> printfn "Part Two: %d"
