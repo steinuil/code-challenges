@@ -138,3 +138,20 @@ let int64ToBaseString (bas: int) (n: int64) = Convert.ToString(n, bas)
 
 
 let invalidInput inp = failwithf "invalid input: %A" inp
+
+
+let isBetween min max v = v >= min && v <= max
+
+
+let interleave el ls =
+    seq {
+        for pos in 0 .. Seq.length ls do
+            Seq.concat [ Seq.take pos ls
+                         Seq.singleton el
+                         Seq.skip pos ls ]
+    }
+
+let rec permutations ls =
+    if Seq.isEmpty ls
+    then Seq.singleton Seq.empty
+    else Seq.collect (interleave <| Seq.head ls) (permutations <| Seq.tail ls)
