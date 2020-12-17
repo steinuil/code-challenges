@@ -8,13 +8,19 @@ let input =
 
 
 type Cube =
-    { Cells: Map<int * int * int, bool>
-      StartX: int
-      EndX: int
-      StartY: int
-      EndY: int
-      StartZ: int
-      EndZ: int }
+    { Cells: Map<uint, bool>
+      StartX: int8
+      EndX: int8
+      StartY: int8
+      EndY: int8
+      StartZ: int8
+      EndZ: int8 }
+
+
+let packIndex x y z =
+    (uint (byte x) <<< 16)
+    ||| (uint (byte y) <<< 8)
+    ||| uint (byte z)
 
 
 let parse input =
@@ -24,20 +30,22 @@ let parse input =
             Seq.indexed line
             |> Seq.fold (fun map (x, c) ->
                 match c with
-                | '#' -> Map.add (x, y, 0) true map
+                | '#' -> Map.add (packIndex (int8 x) (int8 y) 0y) true map
                 | '.' -> map
                 | _ -> Monke.invalidInput c) map) Map.empty
 
-    let lengthX = input |> Seq.item 0 |> Seq.length
-    let lengthY = input |> Seq.length
+    let lengthX =
+        input |> Seq.item 0 |> Seq.length |> int8
+
+    let lengthY = input |> Seq.length |> int8
 
     { Cells = cells
-      EndX = lengthX - 1
-      EndY = lengthY - 1
-      EndZ = 0
-      StartX = 0
-      StartY = 0
-      StartZ = 0 }
+      EndX = lengthX - 1y
+      EndY = lengthY - 1y
+      EndZ = 0y
+      StartX = 0y
+      StartY = 0y
+      StartZ = 0y }
 
 
 let seq3D (s1, e1) (s2, e2) (s3, e3) =
@@ -48,32 +56,31 @@ let seq3D (s1, e1) (s2, e2) (s3, e3) =
 
 
 let around =
-    seq3D (-1, 1) (-1, 1) (-1, 1)
-    |> Seq.filter ((<>) (0, 0, 0))
+    seq3D (-1y, 1y) (-1y, 1y) (-1y, 1y)
+    |> Seq.filter ((<>) (0y, 0y, 0y))
 
 
 let step (inp: Cube) =
     let currCells = inp.Cells
 
-    let mutable minX = 100
-    let mutable maxX = -100
-    let mutable minY = 100
-    let mutable maxY = -100
-    let mutable minZ = 100
-    let mutable maxZ = -100
+    let mutable minX = 100y
+    let mutable maxX = -100y
+    let mutable minY = 100y
+    let mutable maxY = -100y
+    let mutable minZ = 100y
+    let mutable maxZ = -100y
 
     let cells =
-        seq3D (inp.StartX - 1, inp.EndX + 1) (inp.StartY - 1, inp.EndY + 1) (inp.StartZ - 1, inp.EndZ + 1)
+        seq3D (inp.StartX - 1y, inp.EndX + 1y) (inp.StartY - 1y, inp.EndY + 1y) (inp.StartZ - 1y, inp.EndZ + 1y)
         |> Seq.fold (fun nextCells (x, y, z) ->
-
             let isActive =
-                Map.tryFind (x, y, z) currCells
+                Map.tryFind (packIndex (int8 x) (int8 y) (int8 z)) currCells
                 |> Option.defaultValue false
 
             let activeAround =
                 around
                 |> Seq.filter (fun (dX, dY, dZ) ->
-                    Map.tryFind (x + dX, y + dY, z + dZ) currCells
+                    Map.tryFind (packIndex (int8 x + dX) (int8 y + dY) (int8 z + dZ)) currCells
                     |> Option.defaultValue false)
                 |> Seq.length
 
@@ -91,7 +98,7 @@ let step (inp: Cube) =
                 if z < minZ then minZ <- z
                 elif z > maxZ then maxZ <- z
 
-                Map.add (x, y, z) true nextCells
+                Map.add (packIndex x y z) true nextCells
             else
                 nextCells) Map.empty
 
@@ -111,7 +118,7 @@ let print (inp: Cube) =
         |> Seq.iter (fun y ->
             seq { inp.StartX .. inp.EndX }
             |> Seq.iter (fun x ->
-                if Map.tryFind (x, y, z) inp.Cells
+                if Map.tryFind (packIndex x y z) inp.Cells
                    |> Option.defaultValue false then
                     printf "%c" '#'
                 else
@@ -145,18 +152,23 @@ input
 |> printfn "Part One: %d"
 
 
-
 type Cube4D =
-    { Cells: Map<int * int * int * int, bool>
-      StartX: int
-      EndX: int
-      StartY: int
-      EndY: int
-      StartZ: int
-      EndZ: int
-      StartW: int
-      EndW: int }
+    { Cells: Map<uint, bool>
+      StartX: int8
+      EndX: int8
+      StartY: int8
+      EndY: int8
+      StartZ: int8
+      EndZ: int8
+      StartW: int8
+      EndW: int8 }
 
+
+let packIndex4D x y z w =
+    (uint (byte x) <<< 24)
+    ||| (uint (byte y) <<< 16)
+    ||| (uint (byte z) <<< 8)
+    ||| uint (byte w)
 
 
 let seq4D (s1, e1) (s2, e2) (s3, e3) (s4, e4) =
@@ -172,15 +184,18 @@ let seq4D (s1, e1) (s2, e2) (s3, e3) (s4, e4) =
 
 
 let around4D =
-    seq4D (-1, 1) (-1, 1) (-1, 1) (-1, 1)
-    |> Seq.filter ((<>) (0, 0, 0, 0))
+    seq4D (-1y, 1y) (-1y, 1y) (-1y, 1y) (-1y, 1y)
+    |> Seq.filter ((<>) (0y, 0y, 0y, 0y))
+
+
+let idx3DTo4D i w = (i <<< 8) ||| uint (byte w)
 
 
 let to4D (inp: Cube) =
     { Cells =
           inp.Cells
           |> Map.toSeq
-          |> Seq.map (fun ((x, y, z), v) -> (x, y, z, 0), v)
+          |> Seq.map (fun (i, v) -> idx3DTo4D i 0y, v)
           |> Map.ofSeq
       StartX = inp.StartX
       EndX = inp.EndX
@@ -188,37 +203,37 @@ let to4D (inp: Cube) =
       EndY = inp.EndY
       StartZ = inp.StartZ
       EndZ = inp.EndZ
-      StartW = 0
-      EndW = 0 }
+      StartW = 0y
+      EndW = 0y }
 
 
 let step4D (inp: Cube4D) =
     let currCells = inp.Cells
 
-    let mutable minX = 100
-    let mutable maxX = -100
-    let mutable minY = 100
-    let mutable maxY = -100
-    let mutable minZ = 100
-    let mutable maxZ = -100
-    let mutable minW = 100
-    let mutable maxW = -100
+    let mutable minX = 100y
+    let mutable maxX = -100y
+    let mutable minY = 100y
+    let mutable maxY = -100y
+    let mutable minZ = 100y
+    let mutable maxZ = -100y
+    let mutable minW = 100y
+    let mutable maxW = -100y
 
     let cells =
         seq4D
-            (inp.StartX - 1, inp.EndX + 1)
-            (inp.StartY - 1, inp.EndY + 1)
-            (inp.StartZ - 1, inp.EndZ + 1)
-            (inp.StartW - 1, inp.EndW + 1)
+            (inp.StartX - 1y, inp.EndX + 1y)
+            (inp.StartY - 1y, inp.EndY + 1y)
+            (inp.StartZ - 1y, inp.EndZ + 1y)
+            (inp.StartW - 1y, inp.EndW + 1y)
         |> Seq.fold (fun nextCells (x, y, z, w) ->
             let isActive =
-                Map.tryFind (x, y, z, w) currCells
+                Map.tryFind (packIndex4D (int8 x) (int8 y) (int8 z) (int8 w)) currCells
                 |> Option.defaultValue false
 
             let activeAround =
                 around4D
                 |> Seq.filter (fun (dX, dY, dZ, dW) ->
-                    Map.tryFind (x + dX, y + dY, z + dZ, w + dW) currCells
+                    Map.tryFind (packIndex4D (x + dX) (y + dY) (z + dZ) (w + dW)) currCells
                     |> Option.defaultValue false)
                 |> Seq.length
 
@@ -239,7 +254,7 @@ let step4D (inp: Cube4D) =
                 if w < minW then minW <- w
                 elif w > maxW then maxW <- w
 
-                Map.add (x, y, z, w) true nextCells
+                Map.add (packIndex4D x y z w) true nextCells
             else
                 nextCells
 
@@ -285,4 +300,4 @@ input
 |> to4D
 |> step4D6
 |> len4D
-|> printfn "Part One: %d"
+|> printfn "Part Two: %d"
