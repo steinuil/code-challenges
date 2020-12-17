@@ -280,13 +280,9 @@ let len4D ({ Cells = cells }: Cube4D) = cells |> Map.toSeq |> Seq.length
 |> printfn "Example 2: %d"
 
 
-#time
-
 input
 |> parse
 |> to4D
 |> step4D6
 |> len4D
 |> printfn "Part One: %d"
-
-#time
