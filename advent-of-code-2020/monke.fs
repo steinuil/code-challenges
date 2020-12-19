@@ -158,3 +158,9 @@ module Seq =
         if Seq.isEmpty ls
         then Seq.singleton Seq.empty
         else Seq.collect (interleave <| Seq.head ls) (permutations <| Seq.tail ls)
+
+
+let (|SeqCons|SeqNil|) s =
+    match Seq.tryHead s with
+    | Some h -> SeqCons(h, Seq.tail s)
+    | None -> SeqNil
