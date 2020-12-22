@@ -135,6 +135,7 @@ module Array2D =
 
 let byteToBaseString (bas: int) (n: byte) = Convert.ToString(n, bas)
 let int16ToBaseString (bas: int) (n: int16) = Convert.ToString(n, bas)
+let uint16ToBaseString (bas: int) (n: uint16) = Convert.ToString(int16 n, bas)
 let intToBaseString (bas: int) (n: int) = Convert.ToString(n, bas)
 let int64ToBaseString (bas: int) (n: int64) = Convert.ToString(n, bas)
 
@@ -164,3 +165,11 @@ let (|SeqCons|SeqNil|) s =
     match Seq.tryHead s with
     | Some h -> SeqCons(h, Seq.tail s)
     | None -> SeqNil
+
+
+module HashSet =
+    let empty (): HashSet<'T> = HashSet<'T>()
+
+    let contains k (s: HashSet<_>) = s.Contains(k)
+
+    let add k (s: HashSet<_>) = s.Add(k) |> ignore
