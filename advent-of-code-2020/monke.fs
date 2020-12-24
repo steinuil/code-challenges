@@ -173,3 +173,8 @@ module HashSet =
     let contains k (s: HashSet<_>) = s.Contains(k)
 
     let add k (s: HashSet<_>) = s.Add(k) |> ignore
+
+
+let seq2D (s1, e1) (s2, e2) =
+    seq { s1 .. e1 }
+    |> Seq.collect (fun c1 -> seq { s2 .. e2 } |> Seq.map (fun c2 -> (c1, c2)))
