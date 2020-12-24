@@ -194,10 +194,7 @@ let advanceTurns2 til len inp =
 
 let makePart1List orig =
     let head =
-        MutableList.prepend
-            orig
-            { Value = 0
-              Tail = Unchecked.defaultof<_> }
+        MutableList.prepend orig Unchecked.defaultof<_>
 
     let tail = MutableList.skip 8 head
     tail.Tail <- head

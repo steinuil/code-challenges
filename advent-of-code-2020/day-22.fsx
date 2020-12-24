@@ -105,8 +105,7 @@ let deckToString deck =
     Seq.map string deck |> String.concat ","
 
 
-let rec playGame depth decks =
-    printfn "depth %d" depth
+let rec playGame decks =
     let prev1 = Monke.HashSet.empty ()
     let prev2 = Monke.HashSet.empty ()
 
@@ -131,7 +130,7 @@ let rec playGame depth decks =
                 let subDeck1 = List.take c1 deck1
                 let subDeck2 = List.take c2 deck2
 
-                match playGame (depth + 1) (subDeck1, subDeck2) with
+                match playGame (subDeck1, subDeck2) with
                 | GameWin1, _ -> loop (List.append deck1 [ c1; c2 ], deck2)
                 | GameWin2, _ -> loop (deck1, List.append deck2 [ c2; c1 ])
 
@@ -139,7 +138,7 @@ let rec playGame depth decks =
 
 
 let play2 decks =
-    let _, d = playGame 0 decks
+    let _, d = playGame decks
     d
 
 

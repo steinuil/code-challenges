@@ -93,17 +93,20 @@ let filterValidTickets (fields, yourTicket, nearbyTickets) =
 
 
 let findFieldsOrder fields inp =
-    Monke.permutations fields
-    |> Seq.find (fun fields ->
-        printfn
-            "trying with order %s"
-            (fields
-             |> Seq.map (fun { Name = name } -> name)
-             |> String.concat ", ")
-        inp
-        |> Seq.forall (fun ticket ->
-            Seq.zip fields ticket
-            |> Seq.forall (fun (field, num) -> isValidField field num)))
+    Monke.Seq.permutations fields
+    |> Seq.find
+        (fun fields ->
+            printfn
+                "trying with order %s"
+                (fields
+                 |> Seq.map (fun { Name = name } -> name)
+                 |> String.concat ", ")
+
+            inp
+            |> Seq.forall
+                (fun ticket ->
+                    Seq.zip fields ticket
+                    |> Seq.forall (fun (field, num) -> isValidField field num)))
 
 
 let part2 (fields, yourTicket, nearbyTickets) =
@@ -131,9 +134,12 @@ let validFieldsPerColumn (fields, yourTicket, nearbyTickets) =
         (Seq.append (Seq.singleton yourTicket) nearbyTickets)
         |> Seq.transpose
 
-    Seq.fold (fun fieldsPerColumn column ->
-        Seq.filter (fun field -> Seq.forall (fun n -> isValidField field n) column) fields
-        :: fieldsPerColumn) [] ticketsByField
+    Seq.fold
+        (fun fieldsPerColumn column ->
+            Seq.filter (fun field -> Seq.forall (fun n -> isValidField field n) column) fields
+            :: fieldsPerColumn)
+        []
+        ticketsByField
     |> List.rev
 
 
