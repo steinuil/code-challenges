@@ -27,6 +27,9 @@ let main args =
         container.Add(Cookie("session", cookie, Domain = "adventofcode.com"))
         container
 
+    if not (IO.Directory.Exists (sprintf "./advent-of-code-%d" year)) then
+        IO.Directory.CreateDirectory (sprintf "./advent-of-code-%d" year) |> ignore
+
     let uri =
         sprintf "https://adventofcode.com/%d/day/%d/input" year day
 
