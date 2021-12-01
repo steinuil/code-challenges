@@ -1,4 +1,4 @@
-INPUT = File.read("day-01.input").split("\n").map(&:to_i)
+INPUT = File.read("day_01.input").split("\n").map(&:to_i)
 
 # INPUT = %w{199
 # 200
