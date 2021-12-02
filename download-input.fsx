@@ -1,4 +1,6 @@
+#if !INTERACTIVE
 module DownloadAocInput
+#endif
 
 open System
 open System.Net
@@ -8,12 +10,16 @@ type WebClientWithCookies(cookies: CookieContainer) =
 
     override _.GetWebRequest(address: Uri) =
         let req = base.GetWebRequest(address)
+
         match req with
         | :? HttpWebRequest as req -> req.CookieContainer <- cookies
         | _ -> ()
+
         req
 
+#if !INTERACTIVE
 [<EntryPoint>]
+#endif
 let main args =
     let year, day, cookie =
         match args with
@@ -27,8 +33,9 @@ let main args =
         container.Add(Cookie("session", cookie, Domain = "adventofcode.com"))
         container
 
-    if not (IO.Directory.Exists (sprintf "./advent-of-code-%d" year)) then
-        IO.Directory.CreateDirectory (sprintf "./advent-of-code-%d" year) |> ignore
+    if not (IO.Directory.Exists(sprintf "./advent-of-code-%d" year)) then
+        IO.Directory.CreateDirectory(sprintf "./advent-of-code-%d" year)
+        |> ignore
 
     let uri =
         sprintf "https://adventofcode.com/%d/day/%d/input" year day
@@ -38,3 +45,11 @@ let main args =
     req.DownloadFile(uri, sprintf "./advent-of-code-%d/day-%02d.input" year day)
 
     0
+
+#if INTERACTIVE
+do
+    let args =
+        Array.sub fsi.CommandLineArgs 1 (fsi.CommandLineArgs.Length - 1)
+
+    main args |> ignore
+#endif
