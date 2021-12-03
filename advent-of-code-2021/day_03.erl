@@ -17,16 +17,16 @@ parse_binary(Bin) ->
 calculate_gamma_rate(_, 0, Rate) ->
 	Rate;
 calculate_gamma_rate(Input, Digits, Rate) ->
-	{Z, O} = lists:foldl(fun (N, {Z, O}) ->
+	Ratio = lists:foldl(fun (N, R) ->
 		if
 			(N band (1 bsl (Digits - 1))) /= 0 ->
-				{Z, O + 1};
+				R + 1;
 			true ->
-				{Z + 1, O}
+				R - 1
 		end
-	end, {0, 0}, Input),
+	end, 0, Input),
 	D = if
-		Z > O ->
+		Ratio >= 0 ->
 			0;
 		true ->
 			1
