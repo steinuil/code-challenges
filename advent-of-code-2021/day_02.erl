@@ -1,5 +1,6 @@
 -module(day_02).
 -export([main/1]).
+-mode(compile).
 
 
 parse_line(<<"forward ",N/integer>>) ->
@@ -27,8 +28,8 @@ calculate_position2({forward, N}, {X, Y, Aim}) ->
 
 
 main([File]) ->
-	{ok, Input} = ekk:read_lines(File, fun (L) -> parse_line(L) end),
-	{X, Y} = lists:foldl(fun (Command, Pos) -> calculate_position(Command, Pos) end, {0, 0}, Input),
+	{ok, Input} = ekk:read_lines(File, fun parse_line/1),
+	{X, Y} = lists:foldl(fun calculate_position/2, {0, 0}, Input),
 	io:format("Part One: ~w\n", [X * Y]),
-	{X1, Y1, _} = lists:foldl(fun (Command, Pos) -> calculate_position2(Command, Pos) end, {0, 0, 0}, Input),
+	{X1, Y1, _} = lists:foldl(fun calculate_position2/2, {0, 0, 0}, Input),
 	io:format("Part Two: ~w\n", [X1 * Y1]).
