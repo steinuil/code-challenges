@@ -44,30 +44,29 @@ calculate_power_consumption(Input, Digits) ->
 	GammaRate * EpsilonRate.
 
 
-oxygen_generator_rating(Input, Digits, Pos) ->
-	Mask = ((1 bsl Pos) - 1) bsl (Digits - Pos),
-	GammaRate = calculate_gamma_rate(Input, Digits, 0),
+find_rating(Input, Digits, Pos, Fn) ->
+	Mask = 1 bsl (Digits - Pos - 1),
+	GammaRate = Fn(Input, Digits),
 	Filtered = lists:filter(fun (N) -> N band Mask == GammaRate band Mask end, Input),
 	case Filtered of
 		[N] -> N;
-		F -> oxygen_generator_rating(F, Digits, Pos + 1)
+		F -> find_rating(F, Digits, Pos + 1, Fn)
 	end.
 
 
-co2_scrubber_rating(Input, Digits, Pos) ->
-	Mask = 1 bsl (Digits - Pos - 1),
-	GammaRate = calculate_gamma_rate(Input, Digits, 0),
-	EpsilonRate = calculate_epsilon_rate(GammaRate, Digits),
-	Filtered = lists:filter(fun (N) -> N band Mask == EpsilonRate band Mask end, Input),
-	case Filtered of
-		[N] -> N;
-		F -> co2_scrubber_rating(F, Digits, Pos + 1)
-	end.
+oxygen_generator_rating(Input, Digits) ->
+	find_rating(Input, Digits, 0, fun (I, D) -> calculate_gamma_rate(I, D, 0) end).
+
+co2_scrubber_rating(Input, Digits) ->
+	find_rating(Input, Digits, 0, fun (I, D) ->
+		GammaRate = calculate_gamma_rate(I, D, 0),
+		calculate_epsilon_rate(GammaRate, D)
+	end).
 
 
 calculate_life_support_rating(Input, Digits) ->
-	OxygenGeneratorRating = oxygen_generator_rating(Input, Digits, 0),
-	CO2ScrubberRating = co2_scrubber_rating(Input, Digits, 0),
+	OxygenGeneratorRating = oxygen_generator_rating(Input, Digits),
+	CO2ScrubberRating = co2_scrubber_rating(Input, Digits),
 	OxygenGeneratorRating * CO2ScrubberRating.
 
 
