@@ -42,7 +42,7 @@ let main args =
 
     let req = new WebClientWithCookies(cookies)
 
-    req.DownloadFile(uri, sprintf "./advent-of-code-%d/day-%02d.input" year day)
+    req.DownloadFile(uri, sprintf "./advent-of-code-%d/day_%02d.input" year day)
 
     0
 
