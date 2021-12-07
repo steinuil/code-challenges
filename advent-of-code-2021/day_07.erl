@@ -15,8 +15,8 @@ index([_ | Rest], I)  ->
 
 
 min_fuel(Nums) ->
-    Mean = index(lists:sort(Nums), round(length(Nums) / 2)),
-    lists:foldl(fun (N, Sum) -> Sum + abs(Mean - N) end, 0, Nums).
+    Median = index(lists:sort(Nums), round(length(Nums) / 2)),
+    lists:foldl(fun (N, Sum) -> Sum + abs(Median - N) end, 0, Nums).
 
 
 min_fuel2(Nums) ->
