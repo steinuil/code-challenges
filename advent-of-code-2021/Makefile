@@ -5,7 +5,8 @@ days = \
 	day_04.beam \
 	day_05.beam \
 	day_06.beam \
-	day_07.beam
+	day_07.beam \
+	day_08.beam
 
 
 all: ekk.beam $(days)
