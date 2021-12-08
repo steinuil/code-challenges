@@ -13,18 +13,16 @@ read_line(Line) ->
 
 
 part1(Input) ->
-	lists:foldl(fun ({_, Output}, Sum) ->
-		N = lists:foldl(fun (String, Sum2) -> 
+	ekk:list_sum_by(fun ({_, Output}) ->
+		N = ekk:list_sum_by(fun (String) -> 
 			S = length(String),
 			if
-				(S == 2) or (S == 4) or (S == 3) or (S == 7) ->
-					Sum2 + 1;
-				true ->
-					Sum2
+				(S == 2) or (S == 4) or (S == 3) or (S == 7) -> 1;
+				true -> 0
 			end
-		end, 0, Output),
-		N + Sum
-	end, 0, Input).
+		end, Output),
+		N
+	end, Input).
 
 
 digits() -> [
@@ -75,13 +73,13 @@ solve_positions(P) ->
 
 
 part2(Input) ->
-	lists:foldl(fun ({P, Output}, Sum) ->
+	ekk:list_sum_by(fun ({P, Output}) ->
 		Positions = solve_positions(P),
 		lists:foldl(fun (String, Digits) ->
 			N = find_digit(String, Positions),
 			N + (Digits * 10)
-		end, 0, Output) + Sum
-	end, 0, Input).
+		end, 0, Output)
+	end, Input).
 
 
 main([File]) ->
