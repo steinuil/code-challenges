@@ -7,15 +7,8 @@ read_nums(Line) ->
     [binary_to_integer(N) || N <- binary:split(Line, <<$,>>, [trim_all, global])].
 
 
-index([Item | _], 0) ->
-    Item;
-
-index([_ | Rest], I)  ->
-    index(Rest, I - 1).
-
-
 min_fuel(Nums) ->
-    Median = index(lists:sort(Nums), round(length(Nums) / 2)),
+    Median = ekk:list_index(round(length(Nums) / 2), lists:sort(Nums)),
     lists:foldl(fun (N, Sum) -> Sum + abs(Median - N) end, 0, Nums).
 
 
