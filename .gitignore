@@ -6,3 +6,4 @@
 *~
 *.swp
 .ionide
+/aoc-cookie.txt
