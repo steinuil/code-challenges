@@ -1,4 +1,4 @@
--module(day_19).
+-module(day_10).
 -export([main/1]).
 -mode(compile).
 
