@@ -80,14 +80,15 @@ walk_paths2(start, Graph, Visited) ->
   add_paths2(start, Graph, Visited);
 walk_paths2([L|_] = From, Graph, Visited) when L >= $A, L =< $Z ->
   add_paths2(From, Graph, Visited);
-walk_paths2(From, Graph, {_, VTwice} = V) when is_map_key(From, VTwice) ->
-  add_paths2(From, Graph, V);
-walk_paths2(From, Graph, {VOnce, VTwice}) when is_map_key(From, VOnce) ->
-  VT = sets:add_element(From, VTwice),
-  add_paths2(From, Graph, {VOnce, VT});
-walk_paths2(From, Graph, {VOnce, VTwice}) ->
-  VO = sets:add_element(From, VOnce),
-  add_paths2(From, Graph, {VO, VTwice}).
+walk_paths2(From, _, {_, From}) ->
+  0;
+walk_paths2(From, Graph, {Visited, false}) when is_map_key(From, Visited) ->
+  add_paths2(From, Graph, {Visited, From});
+walk_paths2(From, _, {Visited, _}) when is_map_key(From, Visited) ->
+  0;
+walk_paths2(From, Graph, {Visited, Twice}) ->
+  V = sets:add_element(From, Visited),
+  add_paths2(From, Graph, {V, Twice}).
 
 
 main([File]) ->
@@ -95,5 +96,5 @@ main([File]) ->
   Graph = build_graph(Input),
   PathCount = walk_paths(start, Graph, #{}),
   io:format("Part One: ~p\n", [PathCount]),
-  PathCount2 = walk_paths2(start, Graph, {#{}, #{}}),
+  PathCount2 = walk_paths2(start, Graph, {#{}, false}),
   io:format("Part Two: ~p\n", [PathCount2]).
