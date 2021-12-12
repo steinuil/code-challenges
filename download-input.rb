@@ -55,7 +55,7 @@ read_line(Line) ->
 main([File]) ->
 \t{ok, Input} = ekk:read_lines(File, fun read_line/1),
 \tio:format("Part One: ~w\\n", [todo]),
-\tio:format("Part Two: ~w\\n", [todo).
+\tio:format("Part Two: ~w\\n", [todo]).
 TEMPLATE
 
 File.write out_template, template
