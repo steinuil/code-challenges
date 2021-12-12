@@ -18,14 +18,6 @@ read_line(Line) ->
   end.
 
 
-is_capitalized([Letter|_]) when (Letter >= $A), (Letter =< $Z) ->
-  true;
-is_capitalized(L) when is_list(L) ->
-  false;
-is_capitalized(_) ->
-  not_a_string.
-
-
 add_to_graph(Key, Value, Graph) ->
   maps:update_with(Key, fun (Rest) -> sets:add_element(Value, Rest) end,
                    sets:add_element(Value, sets:new([{version,2}])), Graph).
@@ -53,18 +45,15 @@ add_paths(From, Graph, Visited) ->
 
 walk_paths(end_, _, _) ->
   1;
+walk_paths(start, Graph, Visited) ->
+  add_paths(start, Graph, Visited);
+walk_paths([L|_] = From, Graph, Visited) when L >= $A, L =< $Z ->
+  add_paths(From, Graph, Visited);
+walk_paths(From, _, Visited) when is_map_key(From, Visited) ->
+  0;
 walk_paths(From, Graph, Visited) ->
-  case is_capitalized(From) of
-    true ->
-      add_paths(From, Graph, Visited);
-    not_a_string ->
-      add_paths(From, Graph, Visited);
-    false when is_map_key(From, Visited) ->
-      0;
-    false ->
-      V = sets:add_element(From, Visited),
-      add_paths(From, Graph, V)
-  end.
+  V = sets:add_element(From, Visited),
+  add_paths(From, Graph, V).
 
 
 add_paths2(From, Graph, Visited) ->
