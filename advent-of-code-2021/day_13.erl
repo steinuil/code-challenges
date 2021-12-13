@@ -22,14 +22,13 @@ plot(Nx, Mx) ->
 	(M - abs(N rem (2 * M) - M)) - 1.
 
 
-encode_coord({X, Y}) ->
-	(X bsl 10) bor Y.
+-define(COORDS(X, Y), (X bsl 10) bor Y).
 
 
 plot_points(Coords, FX, FY) ->
 	lists:foldl(fun ({coord, X, Y}, Acc) ->
-		Point = {plot(X, FX), plot(Y, FY)},
-		sets:add_element(encode_coord(Point), Acc)
+		Point = ?COORDS(plot(X, FX), plot(Y, FY)),
+		sets:add_element(Point, Acc)
 	end, #{}, Coords).
 
 
@@ -51,7 +50,8 @@ part2(Coords, FF) ->
 	Points = plot_points(Coords, FX, FY),
 	lists:map(fun (Y) ->
 		lists:map(fun (X) ->
-			io:format("~s", [case sets:is_element(encode_coord({X, Y}), Points) of true -> "#"; false -> " " end])
+			Char = if is_map_key(?COORDS(X, Y), Points) -> "#"; true -> " " end,
+			io:format("~s", [Char])
 		end, lists:seq(0, FX - 1)),
 		io:format("\n")
 	end, lists:seq(0, FY - 1)).

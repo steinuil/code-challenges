@@ -11,22 +11,15 @@ parse_line(Line) ->
 	 binary_to_integer(X2B), binary_to_integer(Y2B)}.
 
 
-encode_coord(X, Y) ->
-	(X bsl 10) bor Y.
+-define(COORDS(X, Y), (X bsl 10) bor Y).
 
 
-set_point(X, Y, {One, More} = Map) ->
-	Key = encode_coord(X, Y),
-	case sets:is_element(Key, More) of
-		true -> Map;
-		false ->
-			case sets:is_element(Key, One) of
-				true ->
-					{One, sets:add_element(Key, More)};
-				false ->
-					{sets:add_element(Key, One), More}
-			end
-	end.
+set_point(X, Y, {_, More} = Map) when is_map_key(?COORDS(X, Y), More) ->
+	Map;
+set_point(X, Y, {One, More}) when is_map_key(?COORDS(X, Y), One) ->
+	{One, sets:add_element(?COORDS(X, Y), More)};
+set_point(X, Y, {One, More}) ->
+	{sets:add_element(?COORDS(X, Y), One), More}.
 
 
 intersections2(Lines) ->
