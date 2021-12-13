@@ -20,4 +20,5 @@ main(_) ->
 	day(8, day_08),
 	day(9, day_09),
 	day(10, day_10),
-	day(12, day_12).
+	day(12, day_12),
+	day(13, day_13).
