@@ -1,14 +1,53 @@
 #!/usr/bin/env ruby
 require "net/http"
 require "cgi"
+require "erb"
+require "json"
 
-if ARGV[0] == "-h"
-	puts "Usage: download-input.rb [<year> [<date>]]"
-	exit
+year = nil
+day = nil
+lang = nil
+
+opts = ARGV.dup
+until opts.empty?
+	arg = opts.shift
+	case arg
+	when "-h"
+		puts "Usage: download-input.rb [-h] [-lang <language>] [<year> <day>]"
+		exit
+	when "-lang"
+		lang = opts.shift
+		if lang.nil?
+			STDERR.puts "No language specified"
+			exit 1
+		end
+	else
+		if year.nil?
+			year = arg.to_i
+		elsif day.nil?
+			day = arg.to_i
+		else
+			STDERR.puts "Argument not recognized: #{arg}"
+			exit 1
+		end
+	end
 end
 
-year = (ARGV[0] || Time.now.year).to_i
-day = (ARGV[1] || Time.now.day).to_i
+now = Time.now.localtime("-05:00")
+
+if year && !day
+	STDERR.puts "You need to specify both the year and the day"
+	exit 1
+elsif day.nil? && (now.month != 12  || now.day > 25)
+	STDERR.puts "Today's not a valid Advent of Code day"
+	exit 1
+elsif day && year && (year < 2015 || day < 1 || day > 25)
+	STDERR.puts "Not a valid Advent of Code day: #{year}-12-#{day}"
+	exit 1
+end
+
+year ||= now.year
+day ||= now.day
 
 dir = "advent-of-code-#{year}"
 
@@ -33,30 +72,27 @@ unless Dir.exist? dir
   Dir.mkdir dir
 end
 
-out = File.join(dir, "day_%02d.input" % [day])
+out = File.join(dir, "day%02d.input" % [day])
 File.write out, input
-puts "Written #{dir}/day_%02d.input" % [day]
+puts "Written #{dir}/day%02d.input" % [day]
 
-exit unless year == 2021
+template_config = JSON.load File.read("advent-of-code-templates/config.json")
 
-out_template = File.join(dir, "day_%02d.erl" % [day])
+lang ||= template_config["by_year"][year.to_s]
+
+exit if lang.nil?
+
+extension = template_config["extension"][lang]
+
+if extension.nil?
+	STDERR.puts "Not a valid language: #{lang}"
+	exit 1
+end
+
+out_template = File.join(dir, "day%02d.#{extension}" % [day])
 exit if File.exist? out_template
 
-template = <<TEMPLATE
--module(day_#{"%02d" % [day]}).
--export([main/1]).
--mode(compile).
+template = ERB.new File.read("advent-of-code-templates/#{lang}.erb")
 
-
-read_line(Line) ->
-\tLine.
-
-
-main([File]) ->
-\t{ok, Input} = ekk:read_lines(File, fun read_line/1),
-\tio:format("Part One: ~w\\n", [todo]),
-\tio:format("Part Two: ~w\\n", [todo]).
-TEMPLATE
-
-File.write out_template, template
+File.write out_template, template.result(binding)
 puts "Written #{out_template}"

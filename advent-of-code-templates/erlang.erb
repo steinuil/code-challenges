@@ -1,0 +1,13 @@
+-module(day<%= "%02d" % [day] %>).
+-export(main/1).
+-mode(compile).
+
+
+read_line(Line) ->
+		Line.
+
+
+main([File]) ->
+		{ok, Input} = ekk:read_lines(File, fun read_line/1),
+		io:format("Part One: ~w\n", [todo]),
+		io:format("Part Two: ~w\n", [todo]).
