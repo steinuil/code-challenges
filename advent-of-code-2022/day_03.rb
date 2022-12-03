@@ -1,5 +1,3 @@
-require "set"
-
 input =
   File.read("day_03.input")
     .split("\n")
