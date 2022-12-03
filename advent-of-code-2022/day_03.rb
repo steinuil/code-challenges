@@ -7,9 +7,7 @@ input =
 input1 = input.map { |line| [line[..line.size / 2 - 1], line[line.size / 2..]] }
 
 A_LOWERCASE = 'a'.bytes[0]
-Z_LOWERCASE = 'z'.bytes[0]
 A_UPPERCASE = 'A'.bytes[0]
-Z_UPPERCASE = 'Z'.bytes[0]
 
 def priority c
   b = c.bytes[0]
@@ -22,16 +20,14 @@ end
 
 part1 =
   input1
-    .map { |(l, r)| priority (Set.new(l.chars) & Set.new(r.chars)).to_a[0] }
+    .map { |(l, r)| priority (l.chars & r.chars)[0] }
     .sum
 
 puts "Part 1: #{part1}"
 
-input2 = input.each_slice(3)
-
 part2 =
-  input2
-    .map { |g| priority g.map { |r| Set.new(r.chars) }.inject(&:&).to_a[0] }
+  input.each_slice(3)
+    .map { |g| priority g.map(&:chars).inject(&:&)[0] }
     .sum
 
 puts "Part 2: #{part2}"
