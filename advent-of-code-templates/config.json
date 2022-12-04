@@ -1,8 +1,17 @@
 {
   "extension": {
-    "erlang": "erl"
+    "erlang": "erl",
+    "ruby": "rb"
+  },
+  "runner": {
+    "ruby": [
+      "ruby",
+      "<SCRIPT>",
+      "<INPUT>"
+    ]
   },
   "by_year": {
-    "2021": "erlang"
+    "2021": "erlang",
+    "2022": "ruby"
   }
 }

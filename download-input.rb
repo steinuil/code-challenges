@@ -72,9 +72,9 @@ unless Dir.exist? dir
   Dir.mkdir dir
 end
 
-out = File.join(dir, "day%02d.input" % [day])
+out = File.join(dir, "day_%02d.input" % [day])
 File.write out, input
-puts "Written #{dir}/day%02d.input" % [day]
+puts "Written #{dir}/day_%02d.input" % [day]
 
 template_config = JSON.load File.read("advent-of-code-templates/config.json")
 
@@ -89,7 +89,7 @@ if extension.nil?
 	exit 1
 end
 
-out_template = File.join(dir, "day%02d.#{extension}" % [day])
+out_template = File.join(dir, "day_%02d.#{extension}" % [day])
 exit if File.exist? out_template
 
 template = ERB.new File.read("advent-of-code-templates/#{lang}.erb")
