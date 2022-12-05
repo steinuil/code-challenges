@@ -2,26 +2,32 @@
 -export([main/1]).
 -mode(compile).
 
-
 read_nums(Line) ->
     [binary_to_integer(N) || N <- binary:split(Line, <<$,>>, [trim_all, global])].
 
-
 min_fuel(Nums) ->
     Median = ekk:list_index(round(length(Nums) / 2), lists:sort(Nums)),
-    lists:foldl(fun (N, Sum) -> Sum + abs(Median - N) end, 0, Nums).
-
+    lists:foldl(fun(N, Sum) -> Sum + abs(Median - N) end, 0, Nums).
 
 min_fuel2(Nums) ->
-    lists:min(
-        lists:map(fun (Position) ->
-            lists:sum(
-                lists:map(fun (N) ->
+    ekk:range_fold(
+        fun(Position, Min) ->
+            X = ekk:list_sum_by(
+                fun(N) ->
                     X = abs(Position - N) + 1,
                     round((X * (X - 1)) / 2)
-                end, Nums))
-        end, lists:seq(lists:min(Nums), lists:max(Nums)))).
-
+                end,
+                Nums
+            ),
+            if
+                X < Min -> X;
+                true -> Min
+            end
+        end,
+        0,
+        lists:min(Nums),
+        lists:max(Nums)
+    ).
 
 main([File]) ->
     {ok, [Input]} = ekk:read_lines(File, fun read_nums/1),

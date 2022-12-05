@@ -1,37 +1,56 @@
 -module(ekk).
--export([read_lines/2, read_lines/1, list_index/2, permutations/1, find_map/2, list_sum_by/2]).
+-export([
+    read_lines/2, read_lines/1,
+    list_index/2,
+    permutations/1,
+    find_map/2,
+    list_sum_by/2,
+    range_fold/4
+]).
 
 read_lines(File, Mapper) ->
-	case file:read_file(File) of
-		{ok, Lines} ->
-			{ok, [Mapper(Line) || Line <- binary:split(Lines, <<"\n">>, [trim_all, global])]};
-		Error -> Error
-	end.
+    case file:read_file(File) of
+        {ok, Lines} ->
+            {ok, [Mapper(Line) || Line <- binary:split(Lines, <<"\n">>, [trim_all, global])]};
+        Error ->
+            Error
+    end.
 
 read_lines(File) ->
-	read_lines(File, fun (X) -> X end).
-
+    read_lines(File, fun(X) -> X end).
 
 list_index(0, [Item | _]) ->
-	Item;
-
-list_index(I, [_ | Rest])  ->
-	list_index(I - 1, Rest).
-
+    Item;
+list_index(I, [_ | Rest]) ->
+    list_index(I - 1, Rest).
 
 permutations([]) -> [[]];
-permutations(L)  -> [[H|T] || H <- L, T <- permutations(L -- [H])].
-
+permutations(L) -> [[H | T] || H <- L, T <- permutations(L -- [H])].
 
 find_map(_, []) ->
-	false;
-
-find_map(Fn, [H|T]) ->
-	case Fn(H) of
-		false -> find_map(Fn, T);
-		{value, _} = Found -> Found
-	end.
-
+    false;
+find_map(Fn, [H | T]) ->
+    case Fn(H) of
+        false -> find_map(Fn, T);
+        {value, _} = Found -> Found
+    end.
 
 list_sum_by(Fn, List) ->
-	lists:foldl(fun (Item, Sum) -> Fn(Item) + Sum end, 0, List).
+    lists:foldl(fun(Item, Sum) -> Fn(Item) + Sum end, 0, List).
+
+range_fold(Fn, Acc, N, N) ->
+    Fn(N, Acc);
+range_fold(Fn, Acc, From, To) when From < To ->
+    range_fold(
+        Fn,
+        Fn(From, Acc),
+        From + 1,
+        To
+    );
+range_fold(Fn, Acc, From, To) ->
+    range_fold(
+        Fn,
+        Fn(From, Acc),
+        From - 1,
+        To
+    ).
