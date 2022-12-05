@@ -1,5 +1,5 @@
 input =
-  File.read("day_03.input")
+  File.read(ARGV[0])
     .split("\n")
 
 input1 = input.map { |line| [line[..line.size / 2 - 1], line[line.size / 2..]] }

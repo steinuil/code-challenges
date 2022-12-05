@@ -1,5 +1,5 @@
 input =
-  File.read("day_02.input")
+  File.read(ARGV[0])
     .split("\n")
     .map { |line| line.split(" ") }
 

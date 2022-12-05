@@ -1,17 +1,29 @@
 {
   "extension": {
     "erlang": "erl",
+    "fsharp": "fsx",
     "ruby": "rb"
   },
   "runner": {
-    "ruby": [
-      "ruby",
-      "<SCRIPT>",
-      "<INPUT>"
-    ]
+    "ruby": {
+      "command": ["ruby", "<SCRIPT>", "<INPUT>"],
+      "change_directory": false
+    },
+    "fsharp": {
+      "command": ["dotnet", "fsi", "<SCRIPT>"],
+      "change_directory": true
+    }
   },
   "by_year": {
-    "2021": "erlang",
-    "2022": "ruby"
+    "2020": {
+      "lang": "fsharp",
+      "separator": "-"
+    },
+    "2021": {
+      "lang": "erlang"
+    },
+    "2022": {
+      "lang": "ruby"
+    }
   }
 }

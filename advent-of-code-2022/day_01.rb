@@ -1,6 +1,6 @@
 input =
   File
-    .read("day_01.input")
+    .read(ARGV[0])
     .split("\n")
     .chunk_while { |curr, next_| curr != "" }
     .map { |e| e.reject(&:empty?).map(&:to_i) }
