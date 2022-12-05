@@ -10,40 +10,40 @@ lang = nil
 
 opts = ARGV.dup
 until opts.empty?
-	arg = opts.shift
-	case arg
-	when "-h"
-		puts "Usage: download-input.rb [-h] [-lang <language>] [<year> <day>]"
-		exit
-	when "-lang"
-		lang = opts.shift
-		if lang.nil?
-			STDERR.puts "No language specified"
-			exit 1
-		end
-	else
-		if year.nil?
-			year = arg.to_i
-		elsif day.nil?
-			day = arg.to_i
-		else
-			STDERR.puts "Argument not recognized: #{arg}"
-			exit 1
-		end
-	end
+  arg = opts.shift
+  case arg
+  when "-h"
+    puts "Usage: download-input.rb [-h] [-lang <language>] [<year> <day>]"
+    exit
+  when "-lang"
+    lang = opts.shift
+    if lang.nil?
+      STDERR.puts "No language specified"
+      exit 1
+    end
+  else
+    if year.nil?
+      year = arg.to_i
+    elsif day.nil?
+      day = arg.to_i
+    else
+      STDERR.puts "Argument not recognized: #{arg}"
+      exit 1
+    end
+  end
 end
 
 now = Time.now.localtime("-05:00")
 
 if year && !day
-	STDERR.puts "You need to specify both the year and the day"
-	exit 1
+  STDERR.puts "You need to specify both the year and the day"
+  exit 1
 elsif day.nil? && (now.month != 12  || now.day > 25)
-	STDERR.puts "Today's not a valid Advent of Code day"
-	exit 1
+  STDERR.puts "Today's not a valid Advent of Code day"
+  exit 1
 elsif day && year && (year < 2015 || day < 1 || day > 25)
-	STDERR.puts "Not a valid Advent of Code day: #{year}-12-#{day}"
-	exit 1
+  STDERR.puts "Not a valid Advent of Code day: #{year}-12-#{day}"
+  exit 1
 end
 
 year ||= now.year
@@ -54,16 +54,16 @@ dir = "advent-of-code-#{year}"
 uri = URI "https://adventofcode.com/#{year}/day/#{day}/input"
 
 input = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
-	request = Net::HTTP::Get.new uri.request_uri
-	request["Cookie"] = CGI::Cookie.new("session", File.read("aoc-cookie.txt")).to_s
+  request = Net::HTTP::Get.new uri.request_uri
+  request["Cookie"] = CGI::Cookie.new("session", File.read("aoc-cookie.txt")).to_s
 
-	response = http.request request
+  response = http.request request
 
-	if response.code != "200"
-		STDERR.puts "Error #{response.code}"
-		STDERR.puts response.body
-		exit 1
-	end
+  if response.code != "200"
+    STDERR.puts "Error #{response.code}"
+    STDERR.puts response.body
+    exit 1
+  end
 
   response.body
 end
@@ -85,8 +85,8 @@ exit if lang.nil?
 extension = template_config["extension"][lang]
 
 if extension.nil?
-	STDERR.puts "Not a valid language: #{lang}"
-	exit 1
+  STDERR.puts "Not a valid language: #{lang}"
+  exit 1
 end
 
 out_template = File.join(dir, "day_%02d.#{extension}" % [day])
