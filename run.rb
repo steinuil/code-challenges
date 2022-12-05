@@ -13,7 +13,7 @@ if mode.nil? || !["run", "test"].include?(mode)
   exit 1
 end
 
-opts = ARGV.dup
+opts = ARGV[1..]
 until opts.empty?
   arg = opts.shift
   case arg
@@ -72,12 +72,12 @@ if extension.nil? || runner.nil?
   exit 1
 end
 
-if runner["change_directory"]
-  script_file = "day#{separator}#{"%02d" % [day]}.#{extension}"
-  input_file = "day#{separator}#{"%02d" % [day]}.#{mode == "run" ? "input" : "test"}"
-else
-  script_file = "advent-of-code-#{year}/day#{separator}#{"%02d" % [day]}.#{extension}"
-  input_file = "advent-of-code-#{year}/day#{separator}#{"%02d" % [day]}.#{mode == "run" ? "input" : "test"}"
+script_file = "day#{separator}#{"%02d" % [day]}.#{extension}"
+input_file = "day#{separator}#{"%02d" % [day]}.#{mode == "run" ? "input" : "test"}"
+
+unless runner["change_directory"]
+  script_file = "advent-of-code-#{year}/" + script_file
+  input_file = "advent-of-code-#{year}/" + input_file
 end
 
 cmdline = runner["command"].dup
