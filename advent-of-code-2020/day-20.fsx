@@ -3,7 +3,7 @@
 open System
 
 
-let inputFile = "day-20.test"
+let inputFile = "day-20.input"
 
 
 let tileWidth = 10
@@ -28,11 +28,11 @@ let projectCoordinates x y w rotation flipped =
     | R180, true -> (x, w - y)
 
     // A tile is first rotated and then flipped horizontally.
-    | R90, false -> (w - y, x)
-    | R90, true -> (y, x)
+    | R270, false -> (w - y, x)
+    | R270, true -> (y, x)
 
-    | R270, false -> (y, w - x)
-    | R270, true -> (w - y, w - x)
+    | R90, false -> (y, w - x)
+    | R90, true -> (w - y, w - x)
 
 
 let monsterMask =
@@ -113,48 +113,6 @@ let findWaterRoughness (puzzle: Collections.BitArray) : int =
                 None))
 
 
-do
-    let image =
-        """.#.#..#.##...#.##..#####
-###....#.#....#..#......
-##.##.###.#.#..######...
-###.#####...#.#####.#..#
-##.#....#.##.####...#.##
-...########.#....#####.#
-....#..#...##..#.#.###..
-.####...#..#.....#......
-#..#.##..#..###.#.##....
-#.####..#.####.#.#.###..
-###.#.#...#.######.#..##
-#.####....##..########.#
-##..##.#...#...#.#.#.#..
-...#..#..#.#.##..###.###
-.#.#....#.##.#...###.##.
-###.#...#..#.##.######..
-.#.#.###.##.##.#..#.##..
-.####.###.#...###.#..#.#
-..#.#..#..#.#.#.####.###
-#..####...#.#.#.###.###.
-#####..#####...###....##
-#.##..#..#...#..####...#
-.#.###..##..##..####.##.
-...###...##...#...#..###"""
-
-
-    let puzzle = new Collections.BitArray(24 * 24)
-
-    image
-    |> Monke.String.splitLines
-    |> Seq.collect Monke.String.chars
-    |> Seq.indexed
-    |> Seq.iter (function
-        | (i, '#') -> puzzle.[i] <- true
-        | _ -> ())
-
-    findWaterRoughness puzzle
-    |> printfn "Water roughness example: %d"
-
-
 type Direction =
     | Top
     | Right
@@ -204,17 +162,17 @@ module Tile =
     let projectCoordinates x y tile =
         match tile.rotation, tile.flipped with
         | R0, false -> (x, y)
-        | R0, true -> (w - x, y)
+        | R0, true -> (x, w - y)
 
         | R180, false -> (w - x, w - y)
-        | R180, true -> (x, w - y)
+        | R180, true -> (w - x, y)
 
         // A tile is first rotated and then flipped horizontally.
-        | R90, false -> (w - y, x)
-        | R90, true -> (y, x)
+        | R270, false -> (w - y, x)
+        | R270, true -> (y, x)
 
-        | R270, false -> (y, w - x)
-        | R270, true -> (w - y, w - x)
+        | R90, false -> (y, w - x)
+        | R90, true -> (w - y, w - x)
 
 
     let index x y tile =
@@ -266,7 +224,7 @@ let input =
         Tile.parse tileNum tile)
 
 
-let inputById =
+let tileById =
     input
     |> Seq.fold (fun map tile -> Map.add tile.num tile map) Map.empty
 
@@ -315,3 +273,115 @@ do
             None)
     |> Seq.reduce (*)
     |> printfn "Part One: %d"
+
+
+
+do
+    let puzzleWidth =
+        input |> Seq.length |> float |> sqrt |> int
+
+
+    let topLeftCorner =
+        input
+        |> Seq.pick (fun tile ->
+            let lonelyEdges =
+                tile
+                |> Tile.edges
+                |> Seq.map (fun edge ->
+                    let t1 = Map.find edge tileIdsByEdge
+
+                    let t2 =
+                        Map.find (Edge.reverse edge) tileIdsByEdge
+
+                    if List.length t1 + List.length t2 = 2 then
+                        List.head t1 |> Some
+                    else
+                        None)
+                |> Seq.toList
+
+            if lonelyEdges |> Seq.choose id |> Seq.length = 2 then
+                let rotation =
+                    match lonelyEdges with
+                    | [ Some _; Some _; None; None ] -> R270
+                    | [ None; Some _; Some _; None ] -> R180
+                    | [ None; None; Some _; Some _ ] -> R90
+                    | [ Some _; None; None; Some _ ] -> R0
+                    | _ -> failwithf "invalid lonely edges: %A" lonelyEdges
+
+                Some { tile with rotation = rotation }
+            else
+                None)
+
+    let puzzle = input |> Seq.length |> Array.zeroCreate
+    puzzle.[0] <- topLeftCorner
+
+    for x in 1 .. puzzleWidth - 1 do
+        let lastTile = puzzle.[x - 1]
+        let edge = Tile.edge Right lastTile
+
+        let (nextTileNum, dir, flipped) =
+            Map.find (Edge.reverse edge) tileIdsByEdge
+            |> Seq.find (fun (tileNum, _, _) -> tileNum <> lastTile.num)
+
+        let nextTile = Map.find nextTileNum tileById
+
+        let rot =
+            match dir with
+            | Bottom -> R90
+            | Left -> R0
+            | Top -> R270
+            | Right -> R180
+
+        puzzle.[x] <-
+            { nextTile with
+                rotation = rot
+                flipped = flipped }
+
+    for y in 1 .. puzzleWidth - 1 do
+        for x in 0 .. puzzleWidth - 1 do
+            let tileAbove = puzzle.[(y - 1) * puzzleWidth + x]
+            let edge = Tile.edge Bottom tileAbove
+
+            let (nextTileNum, dir, flipped) =
+                Map.find (Edge.reverse edge) tileIdsByEdge
+                |> Seq.find (fun (tileNum, _, _) -> tileNum <> tileAbove.num)
+
+            let nextTile = Map.find nextTileNum tileById
+
+            let rot =
+                match dir, flipped with
+                | Top, false -> R0
+                | Bottom, false -> R180
+                | Left, false -> R90
+                | Right, false -> R270
+
+                | Top, true -> R180
+                | Bottom, true -> R0
+                | Left, true -> R270
+                | Right, true -> R90
+
+            puzzle.[y * puzzleWidth + x] <-
+                { nextTile with
+                    rotation = rot
+                    flipped = flipped }
+
+    let assembledPuzzleWidth = ((tileWidth - 2) * puzzleWidth)
+
+    let assembledPuzzle =
+        Collections.BitArray(assembledPuzzleWidth * assembledPuzzleWidth)
+
+    let mutable i = 0
+
+    for py in 0 .. puzzleWidth - 1 do
+        for y in 1 .. tileWidth - 2 do
+            for px in 0 .. puzzleWidth - 1 do
+                let tile = puzzle.[py * puzzleWidth + px]
+
+                for x in 1 .. tileWidth - 2 do
+                    if Tile.index x y tile then
+                        assembledPuzzle.[i] <- true
+
+                    i <- i + 1
+
+    findWaterRoughness assembledPuzzle
+    |> printfn "Part Two: %d"
