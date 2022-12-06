@@ -54,10 +54,11 @@ let tryParseInt (s: string) =
     | false, _ -> None
 
 
-let tryParseHexByte (s: string): option<uint8> =
+let tryParseHexByte (s: string) : option<uint8> =
     try
         Convert.ToByte(s, 16) |> Some
-    with _ -> None
+    with
+    | _ -> None
 
 
 module Option =
@@ -68,13 +69,14 @@ module Option =
 let (|RegexMatch|_|) pattern input =
     let m = Regex.Match(input, pattern)
 
-    if m.Success
-    then Some(List.tail [ for g in m.Groups -> g.Value ])
-    else None
+    if m.Success then
+        Some(List.tail [ for g in m.Groups -> g.Value ])
+    else
+        None
 
 
 module Dict =
-    let empty (): Dictionary<'k, 'v> = new Dictionary<'k, 'v>()
+    let empty () : Dictionary<'k, 'v> = new Dictionary<'k, 'v>()
 
     let tryFind key (dict: Dictionary<_, _>) =
         match dict.TryGetValue key with
@@ -156,9 +158,10 @@ module Seq =
         }
 
     let rec permutations ls =
-        if Seq.isEmpty ls
-        then Seq.singleton Seq.empty
-        else Seq.collect (interleave <| Seq.head ls) (permutations <| Seq.tail ls)
+        if Seq.isEmpty ls then
+            Seq.singleton Seq.empty
+        else
+            Seq.collect (interleave <| Seq.head ls) (permutations <| Seq.tail ls)
 
 
 let (|SeqCons|SeqNil|) s =
@@ -168,7 +171,7 @@ let (|SeqCons|SeqNil|) s =
 
 
 module HashSet =
-    let empty (): HashSet<'T> = HashSet<'T>()
+    let empty () : HashSet<'T> = HashSet<'T>()
 
     let contains k (s: HashSet<_>) = s.Contains(k)
 
