@@ -78,7 +78,7 @@ puts "Written #{dir}/day_%02d.input" % [day]
 
 template_config = JSON.load File.read("advent-of-code-templates/config.json")
 
-lang ||= template_config["by_year"][year.to_s]
+lang ||= template_config["by_year"][year.to_s].dig("lang")
 
 exit if lang.nil?
 
