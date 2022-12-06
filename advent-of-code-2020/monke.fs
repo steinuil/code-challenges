@@ -25,6 +25,9 @@ module String =
     let split (seps: string seq) (string: string) =
         string.Split(Seq.toArray seps, StringSplitOptions.None)
 
+    let splitTimes n (seps: string seq) (string: string) =
+        string.Split(Seq.toArray seps, n, StringSplitOptions.None)
+
     let splitLines = split [ "\r\n"; "\n" ]
 
     let splitRemoveEmpty (seps: string seq) (string: string) =
@@ -37,6 +40,8 @@ module String =
     let chars (string: String) = string.ToCharArray()
 
     let fromChars: seq<char> -> String = String.Concat
+
+    let padLeft n c (str: string) = str.PadLeft(n, c)
 
 
 type OptionMonad() =
