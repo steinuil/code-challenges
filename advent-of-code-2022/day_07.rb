@@ -17,7 +17,7 @@ class DirEntry
   end
 
   def size
-    @entries.values.sum(&:size)
+    @size ||= @entries.values.sum(&:size)
   end
 end
 
@@ -117,8 +117,8 @@ def directory_to_delete entries
       size = e.size
       if FREE_SPACE + size >= SPACE_REQUIRED
         sizes << size
+        sizes << directory_to_delete(e.entries)
       end
-      sizes << directory_to_delete(e.entries)
     end
   end
 
