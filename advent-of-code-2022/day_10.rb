@@ -39,3 +39,36 @@ end
 part1 = checkpoints.to_a.map { |(c, x)| c * x }.sum
 
 puts "Part One: #{part1}"
+
+puts "Part Two:"
+
+pc = 0
+x = 1
+queue = nil
+
+6.times do |y|
+  40.times do |xp|
+    cycle = xp
+
+    if x >= cycle - 1 && x <= cycle + 1
+      print '#'
+    else
+      print '.'
+    end
+
+    if queue.nil?
+      instr, v = input[pc]
+      case instr
+      when :noop
+        pc += 1
+      when :addx
+        queue = v
+      end
+    else
+      x += queue
+      queue = nil
+      pc += 1
+    end
+  end
+  puts
+end
