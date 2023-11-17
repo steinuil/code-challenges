@@ -2,13 +2,11 @@
 -export([main/1]).
 -mode(compile).
 
-
 read_line(Line) ->
-		Line.
-
+    Line.
 
 main([File]) ->
-		{ok, Input} = ekk:read_lines(File, fun read_line/1),
+    {ok, Input} = ekk:read_lines(File, fun read_line/1),
     _ = Input,
-		io:format("Part One: ~w\n", [todo]),
-		io:format("Part Two: ~w\n", [todo]).
+    io:format("Part One: ~w\n", [todo]),
+    io:format("Part Two: ~w\n", [todo]).
